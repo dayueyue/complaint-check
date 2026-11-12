@@ -1,0 +1,38 @@
+# C. 诉讼请求（通用 4 项 + 案由专项）
+- id: C1
+  dimension: C
+  title: 请求项编号且非空
+  level: must_fix
+  target: claims
+  check: regex_any
+  patterns: ['[一二三四五六七八九十１-９1-9]+\s*[、.．）)]']
+  advice: 诉讼请求应逐条编号（1. 2. 3. 或 一、二、三、）
+  basis: 文书规范（《民诉法解释》第463条：执行依据须明确）
+
+- id: C2
+  dimension: C
+  title: 金钱请求有明确数额
+  level: must_fix
+  target: claims
+  check: custom:money_amount
+  advice: 涉及赔偿/返还/支付/偿还的请求必须写明具体数额（如"赔偿损失人民币50000元"）
+  basis: 《民诉法解释》第463条（执行依据明确性）
+
+- id: C3
+  dimension: C
+  title: 利息请求完整性
+  level: to_confirm
+  target: whole
+  check: custom:interest_complete
+  advice: 主张利息应同时写明①利率标准（如 LPR 四倍、年利率 X%）②起算日期（自 X 年 X 月 X 日起）
+  basis: 借贷 / 买卖实务
+
+- id: C4
+  dimension: C
+  title: 诉讼费承担请求
+  level: suggestion
+  target: whole
+  check: contains_any
+  patterns: ['诉讼费', '案件受理费']
+  advice: 建议增加一项"本案诉讼费用由被告承担"
+  basis: 《诉讼费用交纳办法》第29条

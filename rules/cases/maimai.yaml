@@ -1,0 +1,63 @@
+# 案由专项：买卖合同纠纷（5 项）
+meta:
+  key: maimai
+  label: 买卖合同纠纷
+  description: 通用检查项 + 买卖合同专项检查
+
+rules:
+  - id: D-M1
+    dimension: D
+    title: 标的物名称、规格与数量
+    level: to_confirm
+    target: facts
+    check: regex_all
+    patterns:
+      - '买|购|售|订购|销售'
+      - '规格|型号|数量|质量|批次|台|件|吨'
+    advice: 事实段应写明标的物的名称、规格型号与数量，影响合同成立与履行认定
+    basis: 《民法典》第470条、第511条
+
+  - id: D-M2
+    dimension: D
+    title: 价款、支付方式与支付期限
+    level: to_confirm
+    target: facts
+    check: regex_all
+    patterns:
+      - '价款|货款|购销款|款项'
+      - '支付|付款|转账|现金|结清'
+    advice: 事实段应写明价款金额、支付方式与支付期限；缺失时结合利息/违约金请求补充
+    basis: 《民法典》第511条
+
+  - id: D-M3
+    dimension: D
+    title: 交货与验收情况
+    level: to_confirm
+    target: facts
+    check: regex_any
+    patterns: ['交货|交付|验收|收货|签收|提货']
+    advice: 主张违约金或损失赔偿时，事实段应写明交货与验收情况，影响违约事实的认定
+    basis: 《民法典》第577条
+
+  - id: D-M4
+    dimension: D
+    title: 违约金计算方式与标准
+    level: to_confirm
+    target: whole
+    check: custom:contains_but_missing
+    params:
+      require: ['违约金']
+      forbid: ['万分之|按.{0,8}计算|计算标准|日.{0,3}元|标准为|按照.{0,6}约定']
+    missing_label: 计算方式与标准（过高部分法院可酌减，建议写明计算依据）
+    advice: 主张违约金应写明计算方式与标准（如"按日万分之五计算"）；过高的违约金法院可予调整
+    basis: 《民法典》第585条
+
+  - id: D-M5
+    dimension: D
+    title: 仲裁条款冲突提示
+    level: to_confirm
+    target: facts
+    check: missing_all
+    patterns: ['仲裁']
+    advice: 事实段提到"仲裁"：若存在有效仲裁协议，应申请仲裁而非起诉，诉讼路径可能错误
+    basis: 《仲裁法》第5条

@@ -1,0 +1,70 @@
+# A. 形式要件（通用，7 项）
+- id: A1
+  dimension: A
+  title: 标题规范
+  level: must_fix
+  target: title
+  check: contains_any
+  patterns: ['起诉状']
+  advice: 首行标题应为"民事起诉状"
+  basis: 《民事诉讼法》通行文书规范
+
+- id: A2
+  dimension: A
+  title: 当事人基本信息段齐全
+  level: must_fix
+  target: whole
+  check: contains_all
+  patterns: ['原告', '被告']
+  advice: 应分别写明原告与被告的基本信息段
+  basis: 《民事诉讼法》通行文书规范
+
+- id: A3
+  dimension: A
+  title: 诉讼请求段
+  level: must_fix
+  target: whole
+  check: contains_any
+  patterns: ['诉讼请求', '请求事项', '判令']
+  advice: 应有明确的"诉讼请求"部分
+  basis: 《民事诉讼法》通行文书规范
+
+- id: A4
+  dimension: A
+  title: 事实与理由段
+  level: must_fix
+  target: whole
+  check: contains_any
+  patterns: ['事实与理由', '事实及理由']
+  advice: 应有"事实与理由"部分
+  basis: 《民事诉讼法》通行文书规范
+
+- id: A5
+  dimension: A
+  title: 具状人落款
+  level: must_fix
+  target: closing
+  check: contains_any
+  patterns: ['具状人', '起诉人']
+  advice: 文末应有"具状人/起诉人"落款并由原告本人签名
+  basis: 《民事诉讼法》通行文书规范
+
+- id: A6
+  dimension: A
+  title: 日期落款
+  level: to_confirm
+  target: closing
+  check: regex_any
+  patterns: ['\d{4}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*日']
+  advice: 文末应写明成文日期，格式如"2026年11月12日"
+  basis: 《民事诉讼法》通行文书规范
+
+- id: A7
+  dimension: A
+  title: 致送法院抬头
+  level: must_fix
+  target: whole
+  check: contains_all
+  patterns: ['此致', '人民法院']
+  advice: 应有"此致 ×××人民法院"的致送部分
+  basis: 《民事诉讼法》第122条（起诉状应当记明的事项）

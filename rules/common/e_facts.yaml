@@ -1,0 +1,28 @@
+# E. 事实与理由（通用 3 项）
+- id: E1
+  dimension: E
+  title: 事实段包含时间要素
+  level: to_confirm
+  target: facts
+  check: regex_any
+  patterns: ['\d{4}\s*年\s*\d{1,2}\s*月', '\d{4}\d{2}\d{2}']
+  advice: 事实与理由段应至少包含一个时间要素（何时发生）
+  basis: 证明力实务
+
+- id: E2
+  dimension: E
+  title: 事实段包含金额要素
+  level: to_confirm
+  target: facts
+  check: custom:facts_amount
+  advice: 诉讼请求涉及金钱给付时，事实与理由段应写明对应金额
+  basis: 实务
+
+- id: E3
+  dimension: E
+  title: 法条引用格式规范
+  level: must_fix
+  target: facts
+  check: custom:citation_format
+  advice: 法条引用应写作"《民法典》第577条"；"民法典577条"属格式错误；全文无引用时建议补充请求权基础条文
+  basis: 文书规范

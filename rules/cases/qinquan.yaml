@@ -1,0 +1,50 @@
+# 案由专项：侵权责任纠纷 · 人身损害赔偿（4 项）
+meta:
+  key: qinquan
+  label: 侵权责任纠纷（人身损害赔偿）
+  description: 通用检查项 + 人身损害侵权专项检查
+
+rules:
+  - id: D-Q1
+    dimension: D
+    title: 侵权行为时间、地点与经过
+    level: to_confirm
+    target: facts
+    check: regex_all
+    patterns:
+      - '\d{4}\s*年\s*\d{1,2}\s*月|\d{4}\d{2}\d{2}'
+      - '在.{1,20}(市|区|县|路|街|村|巷|号)|于.{1,20}(市|区|县|路|街|村|巷|号)'
+    advice: 事实段应写明侵权行为发生的时间、地点与经过，影响侵权事实认定
+    basis: 《民法典》第1165条
+
+  - id: D-Q2
+    dimension: D
+    title: 赔偿项目列明
+    level: to_confirm
+    target: whole
+    check: contains_any
+    patterns: ['医疗费', '误工费', '护理费', '交通费', '营养费', '住院伙食补助费', '残疾赔偿金']
+    advice: 人身损害赔偿应列明各项费用（医疗费、误工费、护理费、交通费等），项目不全将影响赔偿数额认定
+    basis: 《民法典》第1179条
+
+  - id: D-Q3
+    dimension: D
+    title: 损失数额有明确依据
+    level: must_fix
+    target: claims
+    check: custom:money_amount
+    advice: 仅写"赔偿损失"而无数额与计算依据将导致诉请不明确，应列明各项损失金额
+    basis: 《民诉法解释》第463条（执行依据明确性）
+
+  - id: D-Q4
+    dimension: D
+    title: 误工费收入标准与误工时间
+    level: to_confirm
+    target: whole
+    check: custom:contains_but_missing
+    params:
+      require: ['误工']
+      forbid: ['工资|收入|月薪|年薪|元/月|元／月|每天|每日|误工\s*\d+\s*[天日]|误工时间']
+    missing_label: 收入标准与误工时间
+    advice: 主张误工费应写明收入标准（如月收入 X 元）与误工时间（误工 X 天），影响赔偿数额认定
+    basis: 人身损害赔偿司法解释（最高人民法院）

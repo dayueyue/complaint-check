@@ -1,0 +1,49 @@
+# 案由专项：民间借贷纠纷（4 项）
+meta:
+  key: jiamin
+  label: 民间借贷纠纷
+  description: 通用检查项 + 民间借贷专项检查
+
+rules:
+  - id: D-J1
+    dimension: D
+    title: 借款金额与交付方式
+    level: to_confirm
+    target: facts
+    check: regex_all
+    patterns:
+      - '\d[\d,，]*\.?\d*\s*(?:万)?元'
+      - '转账|现金|交付|支付'
+    advice: 事实段应写明借款金额及交付方式（银行转账/现金交付等），直接影响借贷关系成立的认定
+    basis: 民间借贷新规（最高人民法院民间借贷司法解释第15、16条）
+
+  - id: D-J2
+    dimension: D
+    title: 是否写明还款期限
+    level: to_confirm
+    target: facts
+    check: regex_any
+    patterns: ['还款期限|到期|借期|归还期限|于\s*\d{4}\s*年.{0,10}归还']
+    advice: 应写明约定的还款期限，影响诉讼时效起算的判断
+    basis: 《民法典》第188条、第675条
+
+  - id: D-J3
+    dimension: D
+    title: 利率约定是否超过 LPR 四倍
+    level: must_fix
+    target: whole
+    check: custom:rate_lpr4
+    params:
+      lpr4_annual: 12.0
+    advice: 超出一年期 LPR 四倍部分的利息不受法律保护，建议调整为合同成立时 LPR 四倍以内
+    basis: 民间借贷司法解释第25条
+
+  - id: D-J4
+    dimension: D
+    title: 仲裁条款冲突提示
+    level: to_confirm
+    target: facts
+    check: missing_all
+    patterns: ['仲裁']
+    advice: 事实段提到"仲裁"：若双方存在有效仲裁协议，应向仲裁委员会申请仲裁而非起诉，诉讼路径可能错误
+    basis: 《仲裁法》第5条

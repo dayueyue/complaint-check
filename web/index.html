@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComplaintCheck · 起诉状自查工具</title>
+<style>
+  :root {
+    --red: #C62828; --red-bg: #FDECEA;
+    --amber: #B26A00; --amber-bg: #FFF4E0;
+    --blue: #1565C0; --blue-bg: #E8F1FB;
+    --green: #2E7D32;
+    --ink: #263238; --muted: #607D8B;
+    --line: #E0E4E8; --bg: #F6F7F9; --card: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); }
+  header { background: #1A2B3C; color: #fff; padding: 20px 24px; }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header p { font-size: 13px; opacity: .75; margin-top: 4px; }
+  main { max-width: 1080px; margin: 0 auto; padding: 20px 16px 60px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+  .card h2 { font-size: 16px; margin-bottom: 12px; }
+  label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
+  textarea { width: 100%; min-height: 200px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.7; resize: vertical; font-family: inherit; }
+  textarea:focus { outline: 2px solid #90CAF9; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+  select { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; background: #fff; }
+  button { padding: 9px 18px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+  .btn-primary { background: #1A6DFF; color: #fff; font-weight: 600; }
+  .btn-primary:hover { background: #0E5AE0; }
+  .btn-ghost { background: #EEF1F4; color: var(--ink); }
+  .btn-ghost:hover { background: #E1E6EB; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .disclaimer-bar { background: var(--amber-bg); border: 1px solid #F2C078; color: var(--amber); border-radius: 8px; padding: 8px 12px; font-size: 12px; margin-bottom: 16px; }
+
+  /* 结果区 */
+  #result { display: none; }
+  .score-head { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .score-circle { width: 110px; height: 110px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+  .score-circle .num { font-size: 34px; font-weight: 700; line-height: 1; }
+  .score-circle .cap { font-size: 11px; opacity: .85; margin-top: 4px; }
+  .grade-box { flex: 1; min-width: 220px; }
+  .grade-box .grade { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .grade-box .meta { font-size: 13px; color: var(--muted); line-height: 1.8; }
+  .issue-group { margin-top: 16px; }
+  .issue-group h3 { font-size: 14px; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; }
+  .g-must h3 { background: var(--red-bg); color: var(--red); }
+  .g-confirm h3 { background: var(--amber-bg); color: var(--amber); }
+  .g-suggest h3 { background: var(--blue-bg); color: var(--blue); }
+  .issue { border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; background: #fff; }
+  .issue.must { border-left-color: var(--red); }
+  .issue.confirm { border-left-color: var(--amber); }
+  .issue.suggest { border-left-color: var(--blue); }
+  .issue .it { font-size: 14px; font-weight: 600; }
+  .issue .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+  .badge.must { background: var(--red-bg); color: var(--red); }
+  .badge.confirm { background: var(--amber-bg); color: var(--amber); }
+  .badge.suggest { background: var(--blue-bg); color: var(--blue); }
+  .issue .msg { font-size: 13px; margin-top: 6px; line-height: 1.7; }
+  .issue .adv { font-size: 13px; margin-top: 4px; line-height: 1.7; color: var(--green); }
+  .issue .basis { font-size: 12px; margin-top: 6px; color: var(--muted); }
+  .issue .rid { font-size: 11px; color: var(--muted); background: #F1F3F5; border-radius: 4px; padding: 1px 6px; margin-right: 6px; }
+
+  details { margin-top: 8px; }
+  summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--ink); padding: 6px 0; }
+  table.rules { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  table.rules th, table.rules td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; line-height: 1.6; }
+  table.rules th { background: #F1F3F5; }
+  footer { text-align: center; font-size: 12px; color: var(--muted); padding: 24px 16px 40px; line-height: 1.8; }
+  .pass-note { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  @media print { header, .row, .disclaimer-bar, #inputCard, footer button { display: none !important; } #result { display: block !important; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>ComplaintCheck · 起诉状自查工具</h1>
+  <p>基于确定性规则引擎的民事起诉状"立案前体检"——文书仅在内存中处理，不落盘、不上传第三方</p>
+</header>
+
+<main>
+  <div class="disclaimer-bar">⚠️ 本工具仅供学习参考，不构成法律意见；检查结果为规则匹配，正式文书请咨询执业律师。</div>
+
+  <div class="card" id="inputCard">
+    <h2>① 粘贴或上传起诉状</h2>
+    <textarea id="textInput" placeholder="将民事起诉状全文粘贴到此处，或点击下方按钮上传 .txt / .docx 文件……"></textarea>
+    <div class="row">
+      <div>
+        <label for="caseSelect">② 选择案由</label>
+        <select id="caseSelect"></select>
+      </div>
+      <button class="btn-primary" id="btnCheck" style="margin-top:18px">③ 一键自查</button>
+      <span style="margin-top:18px">
+        <button class="btn-ghost" id="btnUpload">上传文件</button>
+        <input type="file" id="fileInput" accept=".txt,.docx" style="display:none">
+      </span>
+      <span id="sampleBtns" style="margin-top:18px"></span>
+    </div>
+    <p class="hint">支持粘贴文本或上传 .txt / .docx；检查为确定性规则匹配，同一文书重复检查结果完全一致。</p>
+  </div>
+
+  <div class="card" id="result">
+    <h2>体检报告</h2>
+    <div class="score-head">
+      <div class="score-circle" id="scoreCircle"><div class="num" id="scoreNum">--</div><div class="cap">立案风险分</div></div>
+      <div class="grade-box">
+        <div class="grade" id="gradeText"></div>
+        <div class="meta" id="metaText"></div>
+      </div>
+      <div>
+        <button class="btn-ghost" id="btnExport">导出 Markdown 报告</button>
+        <button class="btn-ghost" id="btnPrint">打印 / PDF</button>
+      </div>
+    </div>
+    <div id="issueArea"></div>
+    <p class="pass-note" id="passNote"></p>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>检查项溯源（全部规则与法条依据）</summary>
+      <div id="rulesArea">加载中……</div>
+    </details>
+  </div>
+</main>
+
+<footer id="disclaimerFooter">
+  ComplaintCheck · 法律人工智能应用课程作业 · 开源项目（MIT License）<br>
+  仅供学习参考，不构成法律意见，正式文书请咨询执业律师。
+</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let lastReport = null;
+
+// ---------- 初始化 ----------
+async function init() {
+  const r = await fetch('/api/cases').then(x => x.json());
+  const sel = $('caseSelect');
+  r.cases.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.key; opt.textContent = c.label;
+    sel.appendChild(opt);
+  });
+  loadSamples();
+  loadRules();
+}
+
+async function loadSamples() {
+  const r = await fetch('/api/samples').then(x => x.json());
+  const box = $('sampleBtns');
+  r.samples.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'btn-ghost'; b.textContent = '示例：' + s.title.slice(0, 12);
+    b.style.marginRight = '6px';
+    b.onclick = async () => {
+      const d = await fetch('/api/samples/' + s.name).then(x => x.json());
+      $('textInput').value = d.text;
+    };
+    box.appendChild(b);
+  });
+}
+
+async function loadRules() {
+  const r = await fetch('/api/rules').then(x => x.json());
+  const names = {must_fix: '必须修改', to_confirm: '待确认', suggestion: '建议'};
+  let html = '<table class="rules"><tr><th>ID</th><th>维度</th><th>检查项</th><th>级别</th><th>适用范围</th><th>建议</th><th>依据</th></tr>';
+  r.rules.forEach(rule => {
+    html += `<tr><td>${rule.id}</td><td>${rule.dimension}</td><td>${rule.title}</td><td>${names[rule.level] || rule.level}</td><td>${rule.scope}</td><td>${rule.advice}</td><td>${rule.basis}</td></tr>`;
+  });
+  html += '</table>';
+  $('rulesArea').innerHTML = html;
+}
+
+// ---------- 检查 ----------
+async function doCheck(text, caseType) {
+  const resp = await fetch('/api/check', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({text, case_type: caseType})
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    alert('检查失败：' + (err.detail || resp.status));
+    return;
+  }
+  render(await resp.json());
+}
+
+function scoreColor(s) { return s >= 80 ? '#2E7D32' : s >= 60 ? '#B26A00' : '#C62828'; }
+
+function render(report) {
+  lastReport = report;
+  $('result').style.display = 'block';
+  $('scoreCircle').style.background = scoreColor(report.score);
+  $('scoreNum').textContent = report.score;
+  $('gradeText').textContent = report.grade;
+  const must = report.issues.filter(i => i.level === 'must_fix').length;
+  const confirm = report.issues.filter(i => i.level === 'to_confirm').length;
+  const suggest = report.issues.filter(i => i.level === 'suggestion').length;
+  $('metaText').innerHTML =
+    `案由：${report.case_label}｜适用检查项 ${report.total_rules} 项，通过 ${report.passed} 项<br>` +
+    `必须修改 ${must} 项 ×(-15)｜待确认 ${confirm} 项 ×(-5)｜建议 ${suggest} 项不计分`;
+
+  const groups = [
+    {cls: 'g-must', key: 'must_fix', name: '🔴 必须修改（大概率立案受阻）'},
+    {cls: 'g-confirm', key: 'to_confirm', name: '🟡 待确认（可能被退回补充）'},
+    {cls: 'g-suggest', key: 'suggestion', name: '🔵 建议（不影响立案）'}
+  ];
+  let html = '';
+  groups.forEach(g => {
+    const items = report.issues.filter(i => i.level === g.key);
+    if (!items.length) return;
+    html += `<div class="issue-group ${g.cls}"><h3>${g.name}（${items.length}）</h3>`;
+    items.forEach(i => {
+      html += `<div class="issue ${g.key === 'must_fix' ? 'must' : g.key === 'to_confirm' ? 'confirm' : 'suggest'}">
+        <div class="it"><span class="rid">${i.rule_id}</span>${i.title}<span class="badge ${g.key === 'must_fix' ? 'must' : g.key === 'to_confirm' ? 'confirm' : 'suggest'}">${i.level_label}</span></div>
+        <div class="msg">${i.message}</div>
+        <div class="adv">✎ 建议：${i.advice}</div>
+        <div class="basis">📖 依据：${i.basis}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  $('issueArea').innerHTML = html;
+  $('passNote').textContent = report.issues.length === 0 ? '全部检查项通过。' : '';
+  $('result').scrollIntoView({behavior: 'smooth'});
+}
+
+// ---------- 导出 ----------
+function buildMarkdown(r) {
+  const names = {must_fix: '🔴 必须修改', to_confirm: '🟡 待确认', suggestion: '🔵 建议'};
+  let md = `# 起诉状体检报告（ComplaintCheck）\n\n` +
+    `- 立案风险分：**${r.score} / 100**\n- 结论：${r.grade}\n- 案由：${r.case_label}\n` +
+    `- 适用检查项：${r.total_rules}，通过：${r.passed}\n\n`;
+  const groups = ['must_fix', 'to_confirm', 'suggestion'];
+  groups.forEach(k => {
+    const items = r.issues.filter(i => i.level === k);
+    if (!items.length) return;
+    md += `## ${names[k]}（${items.length} 项）\n\n`;
+    items.forEach(i => {
+      md += `### [${i.rule_id}] ${i.title}\n\n` +
+        `- 问题：${i.message}\n- 建议：${i.advice}\n- 依据：${i.basis}\n\n`;
+    });
+  });
+  md += '---\n\n' + r.disclaimer + '\n';
+  return md;
+}
+
+$('btnExport').onclick = () => {
+  if (!lastReport) return;
+  const blob = new Blob([buildMarkdown(lastReport)], {type: 'text/markdown;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '起诉状体检报告.md';
+  a.click();
+};
+
+$('btnPrint').onclick = () => window.print();
+
+// ---------- 事件 ----------
+$('btnCheck').onclick = () => {
+  const t = $('textInput').value;
+  if (!t.trim()) { alert('请先粘贴起诉状文本或上传文件'); return; }
+  doCheck(t, $('caseSelect').value);
+};
+
+$('btnUpload').onclick = () => $('fileInput').click();
+$('fileInput').onchange = async () => {
+  const f = $('fileInput').files[0];
+  if (!f) return;
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('case_type', $('caseSelect').value);
+  const resp = await fetch('/api/check-file', {method: 'POST', body: fd});
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    alert('检查失败：' + (err.detail || resp.status));
+    return;
+  }
+  render(await resp.json());
+};
+
+init();
+</script>
+</body>
+</html>
